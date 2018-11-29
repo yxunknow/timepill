@@ -1,5 +1,7 @@
 package dev.hercats.time.controller
 
+import dev.hercats.time.encode.decode
+import dev.hercats.time.encode.encode
 import dev.hercats.time.mapper.*
 import dev.hercats.time.model.Message
 import dev.hercats.time.model.Pagination
@@ -30,19 +32,16 @@ class PillController(@Autowired val pillMapper: PillMapper,
                 // [1..3] from 1 to 3 and contains the edge number
                 // 计算用户将获得的碎片数量
                 val debris = if (pill.skin.id <= 3) 4 else 8
-                val userSkin = userSkinMapper.getUserSkin(pill.user.id, pill.skin.id)!!
+                // encrypt data
+                pill.apply {
+                    content = encode(user.id, content)
+                }
                 // add pill
                 pillMapper.insertPill(pill)
                 // add user debris
                 val userDebris = userDebrisMapper.getUserDebris(pill.user.id)!!
                 userDebris.amount += debris
                 userDebrisMapper.update(userDebris)
-                if (debris == 8) {
-                    userSkin.amount -= 1
-                    userSkin.skin.id = pill.skin.id
-                    userSkin.user.id = pill.user.id
-                    userSkinMapper.update(userSkin)
-                }
                 msg.code = 200
                 msg.map("pill", pill.apply {
                     pill.user.nickname = ""
@@ -71,7 +70,9 @@ class PillController(@Autowired val pillMapper: PillMapper,
                 val pills = pillMapper.getPillsByUser(userId, pagination)
                 val count = pillMapper.count(userId)
                 msg.code = 200
-                msg.map("pills", pills)
+                msg.map("pills", pills.apply {
+                    forEach { pill -> pill.content = decode(pill.user.id, pill.content) }
+                })
                 msg.map("count", count)
                 msg.map("pagination", pagination)
             }
@@ -102,11 +103,6 @@ class PillController(@Autowired val pillMapper: PillMapper,
             pill.skin.id > 3 && userSkin == null -> {
                 msg.code = 400
                 msg.info = "用户未获得该胶囊"
-                false
-            }
-            pill.skin.id > 3 && userSkin != null && userSkin.amount < 1 -> {
-                msg.code = 400
-                msg.info = "用户胶囊数量不足"
                 false
             }
             else -> {

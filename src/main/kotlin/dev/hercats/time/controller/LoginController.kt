@@ -1,7 +1,9 @@
 package dev.hercats.time.controller
 
 import com.alibaba.fastjson.JSONObject
+import dev.hercats.time.mapper.UserDebrisMapper
 import dev.hercats.time.mapper.UserMapper
+import dev.hercats.time.model.Debris
 import dev.hercats.time.model.Message
 import dev.hercats.time.model.User
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,6 +19,7 @@ const val GRANT_TYPE = "authorization_code"
 @RestController
 @RequestMapping(value = ["/pills"])
 class LoginController(@Autowired val userMapper: UserMapper,
+                      @Autowired val userDebrisMapper: UserDebrisMapper,
                       @Autowired val restTemplate: RestTemplate) {
 
     @RequestMapping(value = ["/login", "/login/"], method = [RequestMethod.POST])
@@ -61,16 +64,20 @@ class LoginController(@Autowired val userMapper: UserMapper,
                         if (aUser == null) {
                             user.id = json.getString("openid")
                             user.token = user.id
-                            if (userMapper.insertUser(user = user) == 1) {
+                            val debris = Debris(user, 702)
+                            if (userMapper.insertUser(user = user) == 1 && userDebrisMapper.insert(debris) == 1) {
                                 msg.code = 200
                                 msg.map("user", user)
+                                msg.map("user_debris", debris)
                             } else {
                                 msg.code = 500
                                 msg.info = "存取用户信息发生错误"
                             }
                         } else {
                             msg.code = 200
+                            val debris = userDebrisMapper.getUserDebris(aUser.id)
                             msg.map("user", aUser)
+                            msg.map("user_debris", debris ?: "")
                         }
                     }
                     else -> {
