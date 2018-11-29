@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dev.hercats.time.mapper.PillMapper">
+    <resultMap id="pill" type="dev.hercats.time.model.Pill">
+        <id column="id" property="id"/>
+        <result column="date" property="date"/>
+        <result column="content" property="content"/>
+        <association property="user" javaType="dev.hercats.time.model.User">
+            <id column="user_id" property="id"/>
+            <result column="user_nickname" property="nickname"/>
+            <result column="user_profile" property="profile"/>
+            <result column="user_token" property="token"/>
+        </association>
+        <association property="skin" javaType="dev.hercats.time.model.Skin">
+            <id column="skin_id" property="id"/>
+            <result column="skin_name" property="name"/>
+            <result column="skin_image" property="image"/>
+            <result column="skin_background" property="background"/>
+            <result column="skin_font_color" property="fontColor"/>
+        </association>
+    </resultMap>
+
+    <insert id="insertPill" useGeneratedKeys="true" keyProperty="pill.id"
+            parameterType="dev.hercats.time.model.Pill">
+        insert into pill_data
+        <trim prefix="(" prefixOverrides="," suffix=")">
+            <if test="pill.user.id != ''">
+                user_id,
+            </if>
+            <if test="pill.date != ''">
+                date,
+            </if>
+            <if test="pill.content != ''">
+                content,
+            </if>
+            <if test="pill.skin.id != -1">
+                skin
+            </if>
+        </trim>
+        values
+        <trim prefix="(" prefixOverrides="," suffix=")">
+            <if test="pill.user.id != ''">
+                #{pill.user.id},
+            </if>
+            <if test="pill.date != ''">
+                #{pill.date},
+            </if>
+            <if test="pill.content != ''">
+                #{pill.content},
+            </if>
+            <if test="pill.skin.id != -1">
+                #{pill.skin.id}
+            </if>
+        </trim>
+    </insert>
+
+    <select id="getPillsByUser" resultMap="pill">
+        select
+        pill_data.id,
+        pill_data.date,
+        pill_data.content,
+        user.id as user_id,
+        user.nickname as user_nickname,
+        user.profile as user_profile,
+        user.token as user_token,
+        pill_skin.id as skin_id,
+        pill_skin.name as skin_name,
+        pill_skin.image as skin_image,
+        pill_skin.background as skin_background,
+        pill_skin.font_color as skin_fontColor
+        from pill_data
+        left join user on pill_data.user_id = user.id
+        left join pill_skin on pill_data.skin = pill_skin.id
+        where pill_data.user_id = #{userId}
+        order by pill_data.id desc
+        limit #{pagination.start}, #{pagination.limit}
+    </select>
+
+    <select id="count" resultType="Long">
+        select count(*) from pill_data
+        where pill_data.user_id = #{userId}
+    </select>
+
+</mapper>

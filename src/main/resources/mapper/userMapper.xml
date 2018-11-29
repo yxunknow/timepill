@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dev.hercats.time.mapper.UserMapper">
+    <resultMap id="user" type="dev.hercats.time.model.User">
+        <id column="id" property="id"/>
+        <result column="nickname" property="nickname"/>
+        <result column="profile" property="profile"/>
+        <result column="token" property="token"/>
+    </resultMap>
+
+    <insert id="insertUser" parameterType="dev.hercats.time.model.User">
+        insert into user
+        <trim prefix="(" prefixOverrides="," suffix=")">
+            <if test="user.id != ''">
+                id,
+            </if>
+            <if test="user.nickname != ''">
+                nickname,
+            </if>
+            <if test="user.profile != ''">
+                profile,
+            </if>
+            <if test="user.token != ''">
+                token
+            </if>
+        </trim>
+        values
+        <trim prefix="(" prefixOverrides="," suffix=")">
+            <if test="user.id != ''">
+                #{user.id},
+            </if>
+            <if test="user.nickname != ''">
+                #{user.nickname},
+            </if>
+            <if test="user.profile != ''">
+                #{user.profile},
+            </if>
+            <if test="user.token != ''">
+                #{user.token}
+            </if>
+        </trim>
+    </insert>
+
+    <select id="selectUser" resultMap="user">
+        select * from user
+        where user.id = #{id}
+    </select>
+</mapper>

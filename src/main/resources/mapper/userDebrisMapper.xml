@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dev.hercats.time.mapper.UserDebrisMapper">
+    <resultMap id="userDebris" type="dev.hercats.time.model.Debris">
+        <result column="debris" property="amount"/>
+        <association property="user" javaType="dev.hercats.time.model.User">
+            <id column="user_id" property="id"/>
+            <result column="user_nickname" property="nickname"/>
+            <result column="user_profile" property="profile"/>
+            <result column="user_token" property="token"/>
+        </association>
+    </resultMap>
+
+    <insert id="insert" parameterType="dev.hercats.time.model.Debris">
+        insert into user_debris
+        (user_id, debris)
+        values
+        (#{debris.user.id}, #{debris.amount})
+    </insert>
+
+    <select id="getUserDebris" resultMap="userDebris">
+        select
+        user_debris.debris,
+        user.id as user_id,
+        user.nickname as user_nickname,
+        user.profile as user_profile,
+        user.token as user_token
+        from user_debris
+        left join user on user_debris.user_id = user.id
+        where user_debris.user_id = #{userId}
+    </select>
+
+    <update id="update" parameterType="dev.hercats.time.model.Debris">
+        update user_debris
+        <set>
+            <if test="debris.amount != 0">
+                debris = #{debris.amount}
+            </if>
+        </set>
+        where user_debris.user_id = #{debris.user.id}
+    </update>
+</mapper>

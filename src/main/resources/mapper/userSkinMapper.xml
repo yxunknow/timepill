@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dev.hercats.time.mapper.UserSkinMapper">
+    <resultMap id="userSkin" type="dev.hercats.time.model.UserSkin">
+        <result column="amount" property="amount"/>
+        <association property="user" javaType="dev.hercats.time.model.User">
+            <id column="user_id" property="id"/>
+            <result column="user_nickname" property="nickname"/>
+            <result column="user_profile" property="profile"/>
+            <result column="user_token" property="token"/>
+        </association>
+        <association property="skin" javaType="dev.hercats.time.model.Skin">
+            <id column="skin_id" property="id"/>
+            <result column="skin_name" property="name"/>
+            <result column="skin_image" property="image"/>
+            <result column="skin_background" property="background"/>
+            <result column="skin_font_color" property="fontColor"/>
+            <result column="skin_price" property="price"/>
+        </association>
+    </resultMap>
+
+    <insert id="insert" parameterType="dev.hercats.time.model.UserSkin">
+        insert into user_skin
+        (user_id, skin_id, amount)
+        values
+        (#{userSkin.user.id}, #{userSkin.skin.id}, #{userSkin.amount})
+    </insert>
+
+    <select id="getUserSkins" resultMap="userSkin">
+        select
+        user_skin.amount,
+        user.id as user_id,
+        user.nickname as user_nickname,
+        user.profile as user_profile,
+        user.token as user_token,
+        pill_skin.id as skin_id,
+        pill_skin.name as skin_name,
+        pill_skin.image as skin_image,
+        pill_skin.background as skin_background,
+        pill_skin.font_color as skin_font_color,
+        pill_skin.price as skin_price
+        from user_skin
+        left join user on user_skin.user_id = user.id
+        left join pill_skin on user_skin.skin_id = pill_skin.id
+        where user_skin.user_id = #{userId}
+        limit #{pagination.start}, #{pagination.limit}
+    </select>
+
+    <select id="count" resultType="Long">
+        select count(*)
+        from user_skin
+        where user_skin.user_id = #{userId}
+    </select>
+
+
+    <select id="getUserSkin" resultType="userSkin">
+        select
+        user_skin.amount,
+        user.id as user_id,
+        user.nickname as user_nickname,
+        user.profile as user_profile,
+        user.token as user_token,
+        pill_skin.id as skin_id,
+        pill_skin.name as skin_name,
+        pill_skin.image as skin_image,
+        pill_skin.background as skin_background,
+        pill_skin.font_color as skin_font_color,
+        pill_skin.price as skin_price
+        from user_skin
+        left join user on user_skin.user_id = user.id
+        left join pill_skin on user_skin.skin_id = pill_skin.id
+        where user_skin.user_id = #{userId} and user_skin.skin_id = #{skinId}
+    </select>
+
+    <update id="update" parameterType="dev.hercats.time.model.UserSkin">
+        update user_skin
+        set user_skin.amount = #{userSkin.amount}
+        where user_id = #{userSkin.user.id} and skin_id = #{userSkin.skin.id}
+    </update>
+</mapper>
