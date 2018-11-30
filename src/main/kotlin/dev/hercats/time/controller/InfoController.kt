@@ -27,7 +27,7 @@ class InfoController(@Autowired val userMapper: UserMapper,
             msg.info = "用戶不存在"
         } else {
             val debris = userDebrisMapper.getUserDebris(userId)
-            val userSkin = userSkinMapper.getUserSkins(userId, Pagination(0, 50))
+            val userSkin = userSkinMapper.getUserSkins(userId, Pagination(0, 1000))
             val pillCount = pillMapper.count(userId)
             msg.code = 200
             msg.map("user", user)

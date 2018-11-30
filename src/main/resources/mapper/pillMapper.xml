@@ -16,7 +16,7 @@
             <result column="skin_name" property="name"/>
             <result column="skin_image" property="image"/>
             <result column="skin_background" property="background"/>
-            <result column="skin_font_color" property="fontColor"/>
+            <result column="skin_fontColor" property="fontColor"/>
         </association>
     </resultMap>
 

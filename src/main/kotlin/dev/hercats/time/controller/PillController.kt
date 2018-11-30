@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RestController
+import java.util.*
 
 @RestController
 @RequestMapping(value = ["/pills"])
@@ -75,6 +76,29 @@ class PillController(@Autowired val pillMapper: PillMapper,
                 })
                 msg.map("count", count)
                 msg.map("pagination", pagination)
+            }
+        }
+        return msg
+    }
+
+    @RequestMapping(value = ["/pill/timemachine", "/pill/timemachine/"], method = [RequestMethod.GET])
+    fun timeMachine(userId: String): Message {
+        val msg = Message()
+        when {
+            userId.isBlank() -> {
+                msg.code = 400
+                msg.info = "缺少用户id参数"
+            }
+            else -> {
+                val pills = pillMapper.getPillsByUser(userId, Pagination(5, 10000))
+                msg.code = 200
+                if (pills.isEmpty()) {
+                    msg.map("pill", "")
+                } else {
+                    val pill = pills[Random().nextInt(pills.size)]
+                    pill.content = decode(userId, pill.content)
+                    msg.map("pill", pill)
+                }
             }
         }
         return msg

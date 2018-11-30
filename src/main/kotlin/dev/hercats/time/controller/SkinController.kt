@@ -71,15 +71,19 @@ class SkinController(@Autowired val skinMapper: SkinMapper,
         when {
             userDebris == null -> {
                 msg.code = 400
-                msg.info = "用户不存在"
+                msg.info = "用戶不存在"
             }
             skin == null -> {
                 msg.code = 400
-                msg.info = "胶囊不存在"
+                msg.info = "膠囊不存在"
+            }
+            userSkin != null -> {
+                msg.code = 400
+                msg.info = "已擁有該皮膚，無需購買!"
             }
             userDebris.amount < skin.price -> {
                 msg.code = 400
-                msg.info = "用户碎片数量不足"
+                msg.info = "碎片數量不足"
             }
             else -> {
                 // there is skin and debris
@@ -87,15 +91,8 @@ class SkinController(@Autowired val skinMapper: SkinMapper,
                 // minus the debris amount and update to db
                 userDebris.amount -= skin.price
                 userDebrisMapper.update(userDebris)
-                if (userSkin == null) {
-                    userSkin = UserSkin(User(id = userId), skin, amount = 1)
-                    userSkinMapper.insert(userSkin)
-                } else {
-                    userSkin.amount++
-                    userSkin.user.id = userId
-                    userSkin.skin.id = skinId
-                    userSkinMapper.update(userSkin)
-                }
+                userSkin = UserSkin(User(id = userId), skin, amount = 1)
+                userSkinMapper.insert(userSkin)
                 msg.code = 200
                 msg.map("userSkin", userSkin)
                 msg.map("userDebris", userDebris)

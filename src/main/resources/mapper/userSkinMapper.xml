@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="dev.hercats.time.mapper.UserSkinMapper">
     <resultMap id="userSkin" type="dev.hercats.time.model.UserSkin">
+        <id column="id"/>
         <result column="amount" property="amount"/>
         <association property="user" javaType="dev.hercats.time.model.User">
             <id column="user_id" property="id"/>
